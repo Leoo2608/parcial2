@@ -10,14 +10,16 @@ export const login = async (req, res)=>{
     try {
        const {username, password} = req.body;
        //console.log(pass);
-       const response = await pool.query('select * from usuario where username = $1', [username]);      
+       const response = await pool.query('select * from rol_user ru join usuario u on u.idusuario = ru.idusuario join rol r on r.idrol = ru.idrol where username = $1', [username]);  
+       /* const response = await pool.query('select * from rol_user ru join usuario u on u.idusuario = ru.idusuario join rol r on r.idrol = ru.idrol where username = $1', [username]);       */    
        console.log(response)
        if(response.rows.length!=0){           
            const passold = response.rows[0].password;
            if(await helpers.matchPassword(password, passold)){
                 const usuario = {
                     idusuario : response.rows[0].idusuario,                    
-                    username : response.rows[0].username
+                    username : response.rows[0].username,
+                    nomrol: response.rows[0].nomrol
                 }
                 const accessToken = jwt.sign({usuario}, secret, {expiresIn:'7200s'});
                 const refreshToken = jwt.sign({usuario}, refreshTokenSecret);
@@ -28,7 +30,7 @@ export const login = async (req, res)=>{
                 });
            }else{
                 return res.status(403).json({
-                    message: 'Username o Password incorrectos...!??'
+                    message: 'Username o Password incorrectos...!xd??'
                 });
            }           
        }
